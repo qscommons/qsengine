@@ -32,8 +32,8 @@ dynamic = ["version"]   # taken from Cargo.toml
 [project.urls]
 Homepage = "https://qsengine.kaiwave.dev"
 Documentation = "https://qsengine.kaiwave.dev/docs/"
-Source = "https://github.com/kaiwave/qsengine"
-Issues = "https://github.com/kaiwave/qsengine/issues"
+Source = "https://github.com/qscommons/qsengine"
+Issues = "https://github.com/qscommons/qsengine/issues"
 "Release notes" = "https://qsengine.kaiwave.dev/docs/release-notes/"
 
 [project.optional-dependencies]

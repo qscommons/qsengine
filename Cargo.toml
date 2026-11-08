@@ -4,7 +4,7 @@ version = "1.1.1"
 edition = "2024"
 license = "MIT"
 description = "High-performance state-vector quantum simulator (CPU + portable GPU backends)"
-repository = "https://github.com/kaiwave/qsengine"
+repository = "https://github.com/qscommons/qsengine"
 homepage = "https://qsengine.kaiwave.dev"
 readme = "README.md"
 # Keep the source distribution to what builds the package: no website, benchmarks or tooling.

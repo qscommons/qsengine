@@ -106,7 +106,7 @@ The full API, every error message and a guide to each topic are in the [document
 
 Each run simulates 5 layers of (H on every qubit, RZ on every qubit, CNOT chain) and samples 1000 shots. Best of at least three runs on a Ryzen 5 5500 with a Radeon RX 6600, Windows 10, Qiskit Aer 0.18.2.
 
-![qsengine against pure Python and Qiskit Aer](https://raw.githubusercontent.com/kaiwave/qsengine/main/benchmarks/benchmark.png)
+![qsengine against pure Python and Qiskit Aer](https://raw.githubusercontent.com/qscommons/qsengine/main/benchmarks/benchmark.png)
 
 | Qubits | Pure Python | qsengine CPU | qsengine GPU | Qiskit Aer |
 | ---: | ---: | ---: | ---: | ---: |
@@ -135,7 +135,7 @@ On the GPU (`backend="gpu"`, or `"auto"` from 20 qubits for circuits that measur
 You need a recent Rust toolchain (tested with 1.88) and Python 3.9 or newer.
 
 ```bash
-git clone https://github.com/kaiwave/qsengine
+git clone https://github.com/qscommons/qsengine
 cd qsengine
 python -m venv .venv
 source .venv/bin/activate       # Windows: .venv\Scripts\activate
