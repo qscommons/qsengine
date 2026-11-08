@@ -1,5 +1,3 @@
-export const metadata = { title: "Release notes" };
-
 # Release notes
 
 ## Version 1.1.1
@@ -9,12 +7,12 @@ Two fixes. Code that worked in 1.1.0 runs unchanged.
 ### Fixes
 
 - `measure()` and `if_test()` accept NumPy integers, such as an element of `np.arange(3)`, for qubits, classical bits and the condition value, as gate methods already did. Before, they raised `TypeError`.
-- `unitary()` records the nearest exactly unitary matrix in place of one that is unitary only to within 1e-9, for example a matrix computed with floating-point arithmetic. Before, the small error was kept, so each such gate changed the state's norm slightly and long circuits drifted. See [Your own gates](/docs/gates/#your-own-gates).
+- `unitary()` records the nearest exactly unitary matrix in place of one that is unitary only to within 1e-9, for example a matrix computed with floating-point arithmetic. Before, the small error was kept, so each such gate changed the state's norm slightly and long circuits drifted. See [Your own gates](gates.md#your-own-gates).
 
 ### Documentation
 
-- The [backends page](/docs/backends/#precision) explains when results are 32-bit: under the default `auto` from 14 qubits on a machine with a GPU, and for mid-circuit measurements on the GPU.
-- The [benchmarks](/docs/benchmarks/) state their caveats: 32-bit GPU against 64-bit Aer, Aer's per-call overhead below 14 qubits, and a single benchmark circuit.
+- The [backends page](backends.md#precision) explains when results are 32-bit: under the default `auto` from 14 qubits on a machine with a GPU, and for mid-circuit measurements on the GPU.
+- The [benchmarks](benchmarks.md) state their caveats: 32-bit GPU against 64-bit Aer, Aer's per-call overhead below 14 qubits, and a single benchmark circuit.
 
 ## Version 1.1.0
 
@@ -45,7 +43,7 @@ Circuit drawings, and two fixes for silent failures.
 
 ### New
 
-- `print(qc)` draws the circuit as text, one wire per qubit. See [Drawing a circuit](/docs/running/#drawing-a-circuit).
+- `print(qc)` draws the circuit as text, one wire per qubit. See [Drawing a circuit](running.md#drawing-a-circuit).
 
 ### Fixes
 

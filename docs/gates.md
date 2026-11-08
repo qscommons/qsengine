@@ -1,4 +1,6 @@
-export const metadata = { title: "Gates" };
+---
+home: true
+---
 
 # Gates
 
@@ -48,7 +50,9 @@ qc.swap(0, 2)
 print(qc.run(shots=100, seed=0))
 ```
 
-<Output printed="{'100': 100}" />
+```output
+{'100': 100}
+```
 
 ## Your own gates
 
@@ -66,7 +70,9 @@ qc.unitary(sx, 0)
 print(qc.probabilities())
 ```
 
-<Output printed="[0. 1.]" />
+```output
+[0. 1.]
+```
 
 A matrix that is not unitary raises `ValueError`, so a typo cannot quietly break the state. A matrix that is unitary to within 1e-9, such as one computed with floating-point arithmetic, is accepted and replaced by the nearest exactly unitary matrix, so small rounding errors cannot add up over a long circuit.
 

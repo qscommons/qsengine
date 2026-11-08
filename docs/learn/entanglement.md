@@ -1,7 +1,3 @@
-import { BELL } from "../../../content";
-
-export const metadata = { title: "Entanglement" };
-
 # Entanglement
 
 Two qubits are entangled when their joint state cannot be split into a state for each one. Measuring one then tells you about the other, however far apart they are.
@@ -22,8 +18,20 @@ $$
 
 That last state is a *Bell state*. In qsengine it is two lines:
 
-<CodeBlock code={BELL.code} label="Copy the Bell state example" />
-<Output printed={BELL.printed} rows={BELL.rows} caption={BELL.caption} />
+```python
+import qsengine
+
+qc = qsengine.QuantumCircuit(2)
+qc.h(0)
+qc.cx(0, 1)
+
+counts = qc.run(shots=1000, seed=1)
+print(counts)
+```
+
+```output caption="Only 00 and 11 appear: the two qubits always agree." bars="00:513 01:0 10:0 11:487"
+{'00': 513, '11': 487}
+```
 
 ## Why it cannot be split
 
@@ -51,10 +59,10 @@ qc.h(1)
 print(qc.probabilities())   # independent
 ```
 
-<Output
-  printed={`[0.5 0.  0.  0.5]
-[0.25 0.25 0.25 0.25]`}
-/>
+```output
+[0.5 0.  0.  0.5]
+[0.25 0.25 0.25 0.25]
+```
 
 Because each side alone is random, entanglement cannot send a message faster than light. It can still do useful work; teleportation and many algorithms are built on it.
 
@@ -66,4 +74,4 @@ $$
 \tfrac{1}{\sqrt2}\left(\ket{000} + \ket{111}\right)
 $$
 
-The [exact amplitudes example](/docs/examples/#ghz) builds it and prints all eight amplitudes.
+The [exact amplitudes example](../examples.md#ghz) builds it and prints all eight amplitudes.

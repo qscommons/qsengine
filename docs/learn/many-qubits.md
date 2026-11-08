@@ -1,5 +1,3 @@
-export const metadata = { title: "Many qubits" };
-
 # Many qubits
 
 Two qubits do not have 2 amplitudes each; together they have 4. Every extra qubit doubles the count, and that doubling is both the power of quantum computing and the reason simulators run out of memory.
@@ -41,13 +39,11 @@ print(qc.probabilities())
 print(qc.run(shots=1000, seed=5))
 ```
 
-{/* taste-skill-ignore: real output, basis states */}
-<Output
-  printed={`[0.25 0.25 0.25 0.25]
-{'10': 262, '00': 235, '11': 245, '01': 258}`}
-  rows={[["00", 235, 1000], ["01", 258, 1000], ["10", 262, 1000], ["11", 245, 1000]]}
-  caption="Four outcomes, each about a quarter of the time: two independent coin flips."
-/>
+<!-- taste-skill-ignore: real output, basis states -->
+```output caption="Four outcomes, each about a quarter of the time: two independent coin flips." bars="00:235 01:258 10:262 11:245"
+[0.25 0.25 0.25 0.25]
+{'10': 262, '00': 235, '11': 245, '01': 258}
+```
 
 ## Which bit is which
 
@@ -61,17 +57,16 @@ print(qc.statevector())
 print(qc.run(shots=100, seed=0))
 ```
 
-{/* taste-skill-ignore: real output */}
-<Output
-  printed={`[0.+0.j 1.+0.j 0.+0.j 0.+0.j]
-{'01': 100}`}
-  caption="Amplitude 1 at index 1, and every shot reads 01."
-/>
+<!-- taste-skill-ignore: real output -->
+```output caption="Amplitude 1 at index 1, and every shot reads 01."
+[0.+0.j 1.+0.j 0.+0.j 0.+0.j]
+{'01': 100}
+```
 
-[Running circuits](/docs/running/#bit-order) has the same rule for the arrays qsengine returns.
+[Running circuits](../running.md#bit-order) has the same rule for the arrays qsengine returns.
 
 ## Gates on one qubit of many
 
 A single-qubit gate on qubit $k$ acts as the tensor product of that gate with the identity on every other qubit. qsengine never builds that $2^n \times 2^n$ matrix: it updates the amplitudes in pairs, which is why it stays fast at 20 qubits and beyond.
 
-Not every two-qubit state can be written as a tensor product. The ones that cannot are [entangled](/docs/learn/entanglement/).
+Not every two-qubit state can be written as a tensor product. The ones that cannot are [entangled](entanglement.md).

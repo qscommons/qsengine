@@ -1,5 +1,3 @@
-export const metadata = { title: "CPU and GPU backends" };
-
 # CPU and GPU backends
 
 Every method that runs a circuit takes a `backend` argument. You rarely need it: the default, `"auto"`, picks the faster backend for the circuit’s size and falls back to the CPU when there is no GPU.

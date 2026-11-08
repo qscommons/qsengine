@@ -1,5 +1,3 @@
-export const metadata = { title: "The Bloch sphere" };
-
 # The Bloch sphere
 
 Every state of a single qubit can be drawn as a point on the surface of a sphere. It turns gates from matrices into something you can picture: each one is a rotation.
@@ -56,11 +54,10 @@ print(qc.statevector())
 print(qc.probabilities())
 ```
 
-<Output
-  printed={`[0.70710678+0.j         0.        -0.70710678j]
-[0.5 0.5]`}
-  caption="The second amplitude is −i/√2, exactly as the formula says, and the odds are 50/50."
-/>
+```output caption="The second amplitude is −i/√2, exactly as the formula says, and the odds are 50/50."
+[0.70710678+0.j         0.        -0.70710678j]
+[0.5 0.5]
+```
 
 ## Where the picture stops
 

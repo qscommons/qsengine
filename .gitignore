@@ -15,6 +15,9 @@ python/qsengine/*.pdb
 site/node_modules/
 site/.next/
 site/out/
+# Generated from docs/ by site/scripts/sync-docs.mjs
+site/app/docs/*/
+site/app/docs-nav.json
 
 # Secrets and editors
 *.env
