@@ -8,7 +8,7 @@ repository = "https://github.com/qscommons/qsengine"
 homepage = "https://qsengine.kaiwave.dev"
 readme = "README.md"
 # Keep the source distribution to what builds the package: no website, benchmarks or tooling.
-exclude = ["site/", "benchmarks/", "docs/", "tests/", ".github/"]
+exclude = ["benchmarks/", "docs/", "tests/", ".github/"]
 
 [lib]
 # `rlib` for Rust users and the demo binary; `cdylib` is the shared library

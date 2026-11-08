@@ -62,4 +62,4 @@ Pages are GitHub Markdown, with a few conventions the site understands. To add a
 - **Anchors.** `<a id="name"></a>` on its own line gives a fixed link target. Keep the ids of existing anchors, since other sites may link to them.
 - **HTML.** Other HTML must be valid JSX (self-closed tags such as `<br />`). `{` and `}` in ordinary text are fine.
 
-To preview the site with your changes, run `npm install` once and then `npm run dev` in `site/`; it rebuilds pages as you edit files here.
+The website is built from this folder by [qsengine-site](https://github.com/qscommons/qsengine-site), which republishes it once a day from the latest release. To preview your changes, clone that repository next to this one, run `npm install` once and then `npm run dev` in it; it rebuilds pages as you edit files here.

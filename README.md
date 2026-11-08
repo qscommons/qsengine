@@ -154,16 +154,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how the pieces fit together and how t
 
 To build without the GPU backend, use `cargo build --no-default-features` for Rust.
 
-The website lives in `site/` (Next.js, static export, maths rendered with KaTeX at build time):
-
-```bash
-cd site
-npm install
-npm run dev                     # local preview
-npm run build                   # static site in site/out/
-```
-
-Docs pages are Markdown (`site/app/docs/**/page.mdx`) with `$maths$`, tables and fenced code; `<Output printed="..." />` shows what a snippet prints. To add a page, create its `page.mdx` and list it in `DOCS` in `site/app/content.js`, which drives the sidebar and the previous/next links.
+The documentation is Markdown in [docs/](docs/), and reads on GitHub as it does on the website. The website itself is built from it by [qsengine-site](https://github.com/qscommons/qsengine-site), which picks up each new release within a day. See [docs/README.md](docs/README.md) to write or preview a page.
 
 ## Project layout
 
@@ -177,7 +168,7 @@ src/                Rust core: all simulation
 python/qsengine/    The Python package: wraps _core, adds the drawer and if_test, type hints
 tests/              Python tests against NumPy
 benchmarks/         Benchmark script, results and plot
-site/               Documentation and learning website
+docs/               Documentation, in Markdown (published by qsengine-site)
 docs/RUST_GUIDE.md  A guide to every Rust feature the engine uses
 ```
 
