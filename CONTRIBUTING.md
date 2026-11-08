@@ -4,7 +4,7 @@ Thanks for helping. Bug reports, examples, docs fixes and new gates are all welc
 
 ## Set up
 
-You need a recent Rust toolchain (tested with 1.88), Python 3.9 or newer, and Node 22 for the website.
+You need a recent Rust toolchain (tested with 1.88), and Python 3.9 or newer.
 
 ```bash
 git clone https://github.com/qscommons/qsengine
@@ -37,7 +37,7 @@ Re-run `maturin develop --release` after every Rust change; Python-only changes 
 | `src/python.rs` | PyO3 bindings, built as `qsengine._core` |
 | `python/qsengine/` | The Python package: subclasses `_core.QuantumCircuit` and adds the drawer, `if_test` and conveniences |
 | `tests/test_circuit.py` | Python tests against a NumPy reference simulator |
-| `site/` | The documentation website (Next.js, static export) |
+| `docs/` | The documentation, in Markdown; published by [qsengine-site](https://github.com/qscommons/qsengine-site) |
 
 **Simulation stays in Rust.** Anything that is not simulation and is easier in Python (drawing, parsing, plotting helpers) can be a plain file in `python/qsengine/`, as long as it does not slow down recording gates or running circuits.
 
@@ -51,7 +51,7 @@ Use an existing gate of the same shape as your template: `p` for one qubit with 
 4. **`python/qsengine/_core.pyi`**: the type signature.
 5. **`python/qsengine/_drawer.py`**: the symbol `print(qc)` draws for it, in `SYMBOLS`.
 6. **`tests/test_circuit.py`**: add it to `build_pair` and to a test that compares against the NumPy reference, on both backends.
-7. **Docs**: `site/app/docs/gates/page.mdx`, the API reference in `site/app/docs/api/page.jsx`, and the gate table in `README.md`.
+7. **Docs**: `docs/gates.md`, the API reference in `docs/api.md`, and the gate table in `README.md`.
 
 A gate made only of existing 2x2 matrices and controls needs no backend or shader changes: every backend runs every gate through one kernel.
 
@@ -59,7 +59,8 @@ A gate made only of existing 2x2 matrices and controls needs no backend or shade
 
 - Keep one change per pull request, with tests that fail without it.
 - Write code like the code around it: the same naming, comment density and error style. Errors are `QsError` variants in Rust and become `ValueError` in Python.
-- Every output printed on the website comes from really running the code. If your change alters an output, update the page.
-- Note user-visible changes in `site/app/docs/release-notes/page.mdx`.
+- Every output in `docs/` comes from really running the code. If your change alters an output, update the page.
+- Note user-visible changes in `docs/release-notes.md`.
+- Docs changes go in the same pull request as the code they describe. See [docs/README.md](docs/README.md) for how pages are written.
 
 By contributing you agree that your work is released under the MIT licence.
