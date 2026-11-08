@@ -7,7 +7,7 @@ Thanks for helping. Bug reports, examples, docs fixes and new gates are all welc
 You need a recent Rust toolchain (tested with 1.88), Python 3.9 or newer, and Node 22 for the website.
 
 ```bash
-git clone https://github.com/kaiwave/qsengine
+git clone https://github.com/qscommons/qsengine
 cd qsengine
 python -m venv .venv
 source .venv/bin/activate       # Windows: .venv\Scripts\activate
