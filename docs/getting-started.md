@@ -1,6 +1,6 @@
-import { BELL } from "../../content";
-
-export const metadata = { title: "Installation and first circuit" };
+---
+home: true
+---
 
 # Installation and first circuit
 
@@ -21,16 +21,30 @@ import qsengine
 print(qsengine.__version__)
 ```
 
-<Output printed={<Version />} />
+```output
+{{version}}
+```
 
-A GPU is optional. With one, large circuits run on it; without one, everything runs on the CPU. See [CPU and GPU backends](/docs/backends/).
+A GPU is optional. With one, large circuits run on it; without one, everything runs on the CPU. See [CPU and GPU backends](backends.md).
 
 ## Your first circuit
 
 A circuit has a fixed number of qubits that all start in |0⟩. You add gates by calling methods on it. Nothing runs until you ask for a result.
 
-<CodeBlock code={BELL.code} label="Copy the first circuit" />
-<Output printed={BELL.printed} rows={BELL.rows} caption={BELL.caption} />
+```python
+import qsengine
+
+qc = qsengine.QuantumCircuit(2)
+qc.h(0)
+qc.cx(0, 1)
+
+counts = qc.run(shots=1000, seed=1)
+print(counts)
+```
+
+```output caption="Only 00 and 11 appear: the two qubits always agree." bars="00:513 01:0 10:0 11:487"
+{'00': 513, '11': 487}
+```
 
 Line by line:
 
@@ -43,6 +57,6 @@ The keys are bitstrings with qubit 0 on the right. `seed` makes the counts repea
 
 ## Next steps
 
-- [Examples](/docs/examples/) show exact amplitudes, rotations and error handling.
-- [Gates](/docs/gates/) lists every gate you can add.
-- [Running circuits](/docs/running/) explains shots, seeds and exact states.
+- [Examples](examples.md) show exact amplitudes, rotations and error handling.
+- [Gates](gates.md) lists every gate you can add.
+- [Running circuits](running.md) explains shots, seeds and exact states.

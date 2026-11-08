@@ -1,4 +1,6 @@
-export const metadata = { title: "Qubits and bra-ket notation" };
+---
+home: true
+---
 
 # Qubits and bra-ket notation
 
@@ -28,7 +30,7 @@ $$
 |\alpha|^2 + |\beta|^2 = 1
 $$
 
-because, as the [measurement page](/docs/learn/measurement/) explains, the squares are probabilities and must add up to 1. A state with both amplitudes non-zero is in *superposition*.
+because, as the [measurement page](measurement.md) explains, the squares are probabilities and must add up to 1. A state with both amplitudes non-zero is in *superposition*.
 
 ## Making a superposition
 
@@ -50,12 +52,10 @@ print(qc.statevector())
 print(qc.run(shots=1000, seed=3))
 ```
 
-<Output
-  printed={`[0.70710678+0.j 0.70710678+0.j]
-{'0': 493, '1': 507}`}
-  rows={[["0", 493, 1000], ["1", 507, 1000]]}
-  caption="Equal amplitudes, so 0 and 1 each come up about half the time."
-/>
+```output caption="Equal amplitudes, so 0 and 1 each come up about half the time." bars="0:493 1:507"
+[0.70710678+0.j 0.70710678+0.j]
+{'0': 493, '1': 507}
+```
 
 ## Gates are matrices
 
@@ -65,7 +65,7 @@ $$
 X = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \qquad X\ket{0} = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}\begin{pmatrix} 1 \\ 0 \end{pmatrix} = \ket{1}
 $$
 
-Every gate in qsengine is a matrix like this. The [gates page](/docs/gates/) lists them all.
+Every gate in qsengine is a matrix like this. The [gates page](../gates.md) lists them all.
 
 ## Bras
 

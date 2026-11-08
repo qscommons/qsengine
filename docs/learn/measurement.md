@@ -1,5 +1,3 @@
-export const metadata = { title: "Measurement" };
-
 # Measurement
 
 You never see amplitudes directly. Measuring a qubit always gives a plain 0 or 1, and the amplitudes only decide how likely each one is.
@@ -33,14 +31,12 @@ print(qc.probabilities())
 print(qc.run(shots=1000, seed=7))
 ```
 
-<Output
-  printed={`[0.75 0.25]
-{'1': 257, '0': 743}`}
-  rows={[["0", 743, 1000], ["1", 257, 1000]]}
-  caption="probabilities() gives the exact 0.75; 1000 shots give 743, close to it but not exact."
-/>
+```output caption="probabilities() gives the exact 0.75; 1000 shots give 743, close to it but not exact." bars="0:743 1:257"
+[0.75 0.25]
+{'1': 257, '0': 743}
+```
 
-The more shots, the closer the counts get to the probabilities. `probabilities()` skips sampling altogether, which no real device can do. See [Running circuits](/docs/running/).
+The more shots, the closer the counts get to the probabilities. `probabilities()` skips sampling altogether, which no real device can do. See [Running circuits](../running.md).
 
 ## Phase: what measurement cannot see
 
@@ -65,10 +61,9 @@ qc.h(0)
 print(qc.probabilities())
 ```
 
-<Output
-  printed={`[1. 0.]
-[0. 1.]`}
-  caption="The Z gate changed nothing you could measure on its own, yet it flipped the final answer."
-/>
+```output caption="The Z gate changed nothing you could measure on its own, yet it flipped the final answer."
+[1. 0.]
+[0. 1.]
+```
 
-This is the effect quantum algorithms rely on: steer the phases so wrong answers cancel and right answers add up. The [Deutsch-Jozsa algorithm](/docs/learn/deutsch-jozsa/) is a complete example.
+This is the effect quantum algorithms rely on: steer the phases so wrong answers cancel and right answers add up. The [Deutsch-Jozsa algorithm](deutsch-jozsa.md) is a complete example.

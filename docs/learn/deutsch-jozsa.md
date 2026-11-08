@@ -1,5 +1,3 @@
-export const metadata = { title: "The Deutsch-Jozsa algorithm" };
-
 # The Deutsch-Jozsa algorithm
 
 This is the first algorithm where a quantum computer provably needs fewer steps than any classical one. It is small enough to run in full on qsengine and uses every idea from the earlier pages: superposition, phase and interference.
@@ -89,13 +87,12 @@ for oracle in [constant_zero, constant_one, parity, middle_bit]:
     print(oracle.__name__, deutsch_jozsa(oracle))
 ```
 
-<Output
-  printed={`constant_zero {'1000': 1000}
+```output caption="Every shot of every run gives one bitstring: no sampling noise, the answer is certain."
+constant_zero {'1000': 1000}
 constant_one {'1000': 1000}
 parity {'1111': 1000}
-middle_bit {'1010': 1000}`}
-  caption="Every shot of every run gives one bitstring: no sampling noise, the answer is certain."
-/>
+middle_bit {'1010': 1000}
+```
 
 ## Reading the result
 
@@ -108,4 +105,4 @@ A balanced result also names the inputs the function depends on: parity uses all
 
 ## Where next
 
-Each oracle was called once, against five calls a classical program would need in the worst case for three bits. The gap grows exponentially with $n$. Try the program with a larger `N`, or write your own balanced oracle; the [gates page](/docs/gates/) lists everything you can use.
+Each oracle was called once, against five calls a classical program would need in the worst case for three bits. The gap grows exponentially with $n$. Try the program with a larger `N`, or write your own balanced oracle; the [gates page](../gates.md) lists everything you can use.

@@ -1,4 +1,6 @@
-export const metadata = { title: "Running circuits" };
+---
+home: true
+---
 
 # Running circuits
 
@@ -23,11 +25,13 @@ qc.cx(1, 2)
 print(qc)
 ```
 
-<Output printed={`q0: ──H──●────
+```output
+q0: ──H──●────
          │
 q1: ─────X──●─
             │
-q2: ────────X─`} />
+q2: ────────X─
+```
 
 ## Shots and counts
 
@@ -38,7 +42,9 @@ counts = qc.run(shots=1000, seed=1)
 print(sum(counts.values()))
 ```
 
-<Output printed="1000" />
+```output
+1000
+```
 
 ## Seeds
 
@@ -54,7 +60,9 @@ qc.x(0)
 print(qc.run(shots=10, seed=0))
 ```
 
-<Output printed="{'001': 10}" />
+```output
+{'001': 10}
+```
 
 ## Measuring part-way
 
@@ -76,11 +84,13 @@ qc.measure(2, 2)
 print(qc)
 ```
 
-<Output printed={`q0: ──RY(2.00)────────●──H──M→c0───────────────────────────────────
+```output
+q0: ──RY(2.00)────────●──H──M→c0───────────────────────────────────
                       │
 q1: ────────────H──●──X───────────M→c1─────────────────────────────
                    │
-q2: ───────────────X────────────────────X if c1=1──Z if c0=1──M→c2─`} />
+q2: ───────────────X────────────────────X if c1=1──Z if c0=1──M→c2─
+```
 
 When a circuit measures, `run()` counts its classical bits, with bit 0 on the right. Here bit 2 holds the teleported qubit. It reads 1 in about 71% of shots, which is sin²(1.0) for the `ry(0, 2.0)` it started with, whatever the two random bits on the right were.
 
@@ -89,7 +99,9 @@ counts = qc.run(shots=1000, seed=1)
 print(sum(n for bits, n in counts.items() if bits[0] == "1"))
 ```
 
-<Output printed="700" />
+```output
+700
+```
 
 `reset(qubit)` puts a qubit back to |0⟩, so one qubit can be measured and reused. A `with qc.if_test([0, 1], 0b10):` block tests several bits at once: bit *i* of the value is the value required of the *i*-th bit in the list.
 
@@ -112,12 +124,14 @@ coeffs = np.array([0.5, 0.5, -1.0])
 print(coeffs @ qc.expectation(["XX", "YY", "ZI"]))  # energy of 0.5 XX + 0.5 YY - ZI
 ```
 
-<Output printed={`1.0000000000000002
+```output
+1.0000000000000002
 [ 1. -1.  0.]
-0.0`} />
+0.0
+```
 
 ## Exact results
 
-`probabilities()` and `statevector()` return all 2ⁿ values, so they grow quickly: 20 qubits is about a million numbers. They come back as NumPy arrays, copied straight from Rust without a Python object per number, ready for vector maths. Use `run()` when you only need counts. See the [exact amplitudes example](/docs/examples/#ghz).
+`probabilities()` and `statevector()` return all 2ⁿ values, so they grow quickly: 20 qubits is about a million numbers. They come back as NumPy arrays, copied straight from Rust without a Python object per number, ready for vector maths. Use `run()` when you only need counts. See the [exact amplitudes example](examples.md#ghz).
 
-"Exact" here means computed rather than sampled, not free of rounding. With the default `backend="auto"` these results are 64-bit below 14 qubits and 32-bit from 14 when a GPU is present; see [Precision](/docs/backends/#precision). Pass `backend="cpu"` for 64-bit results at every size.
+"Exact" here means computed rather than sampled, not free of rounding. With the default `backend="auto"` these results are 64-bit below 14 qubits and 32-bit from 14 when a GPU is present; see [Precision](backends.md#precision). Pass `backend="cpu"` for 64-bit results at every size.
