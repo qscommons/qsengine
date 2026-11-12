@@ -5,7 +5,7 @@ edition = "2024"
 license = "MIT"
 description = "High-performance state-vector quantum simulator (CPU + portable GPU backends)"
 repository = "https://github.com/qscommons/qsengine"
-homepage = "https://qsengine.kaiwave.dev"
+homepage = "https://qscommons.org/projects/qsengine/"
 readme = "README.md"
 # Keep the source distribution to what builds the package: no website, benchmarks or tooling.
 exclude = ["benchmarks/", "docs/", "tests/", ".github/"]

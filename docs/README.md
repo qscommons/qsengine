@@ -1,8 +1,8 @@
 # qsengine documentation
 
-This folder is the qsengine documentation. Every page here is published on [qsengine.kaiwave.dev/docs](https://qsengine.kaiwave.dev/docs/), and reads the same on GitHub. When you change how qsengine behaves, change the page that describes it in the same pull request.
+This folder is the qsengine documentation. Every page here is published on [qsengine.qscommons.org/docs](https://qsengine.qscommons.org/docs/), and reads the same on GitHub. When you change how qsengine behaves, change the page that describes it in the same pull request.
 
-The list below is the table of contents. The site builds its sidebar, its docs index and the links on its home page from it, in this order. Pages marked with `home: true` at the top are also listed on the home page.
+The list below is the table of contents. The site builds its sidebar and its docs index from it, in this order.
 
 ## Getting started
 
@@ -39,14 +39,6 @@ The list below is the table of contents. The site builds its sidebar, its docs i
 Pages are GitHub Markdown, with a few conventions the site understands. To add a page, create the file and add a line for it to the list above; the site build fails if a page is missing from the list or the list names a file that does not exist.
 
 - **Title.** The page's `# Heading` is its title. The `## Headings` become the sections listed under the page in the sidebar.
-- **Home page.** To list a page on the site's home page, start it with:
-
-  ```
-  ---
-  home: true
-  ---
-  ```
-
 - **Links.** Link to other pages by their file, `[Gates](gates.md#your-own-gates)`, and to other files in the repository by relative path, `[results.csv](../benchmarks/results.csv)`. Both work on GitHub and on the site.
 - **Maths.** `$\ket{0}$` inline, and a block between two lines of `$$`. The site renders it with KaTeX and fails the build on a broken formula.
 - **Program output.** Show what a snippet prints in an `output` block right after it. Re-run the code and paste the real output after any release that changes behaviour.

@@ -1,7 +1,3 @@
----
-home: true
----
-
 # Installation and first circuit
 
 This page installs qsengine, builds a two-qubit circuit and reads its measurement counts. It takes a few minutes.

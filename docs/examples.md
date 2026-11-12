@@ -1,7 +1,3 @@
----
-home: true
----
-
 # Examples
 
 Each example is a complete program. Copy it, run it, and you will see the output shown under it: every output on this page was produced by running the code with qsengine {{version}}.
