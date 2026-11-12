@@ -1,7 +1,3 @@
----
-home: true
----
-
 # Qubits and bra-ket notation
 
 A classical bit is either 0 or 1. A qubit has two basic states too, but it can also be in a blend of both at once. This page shows how physicists write those states down, which is the notation the rest of these pages use.

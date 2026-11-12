@@ -1,7 +1,3 @@
----
-home: true
----
-
 # API reference
 
 The whole public API is one class, `qsengine.QuantumCircuit`, and a version string. Backends are chosen with the `backend` argument: `"auto"`, `"cpu"` or `"gpu"`.

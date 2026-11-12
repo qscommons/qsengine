@@ -1,7 +1,3 @@
----
-home: true
----
-
 # Gates
 
 qsengine has nineteen named gates, and `unitary()` for any other. Each is a method on `QuantumCircuit` that records the gate; the circuit runs only when you ask for a result. `q`, `control` and `target` are qubit numbers starting at 0, and angles are in radians.

@@ -16,7 +16,7 @@ qc.cx(0, 1)
 print(qc.run(shots=1000, seed=1))   # {'00': 513, '11': 487}
 ```
 
-**Documentation and guides:** [qsengine.kaiwave.dev](https://qsengine.kaiwave.dev)
+**Documentation and guides:** [qsengine.qscommons.org/docs](https://qsengine.qscommons.org/docs/)
 
 ---
 
@@ -100,7 +100,7 @@ Every method that runs a circuit takes `backend="auto"` (the default), `"cpu"` o
 
 With the default `"auto"`, `statevector()`, `probabilities()` and `expectation()` switch from 64-bit to 32-bit results at 14 qubits on a machine with a GPU. Pass `backend="cpu"` when you need full 64-bit precision at every size, for example in a study that compares results across register sizes.
 
-The full API, every error message and a guide to each topic are in the [documentation](https://qsengine.kaiwave.dev/docs/).
+The full API, every error message and a guide to each topic are in the [documentation](https://qsengine.qscommons.org/docs/).
 
 ## Performance
 

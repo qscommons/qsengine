@@ -1,7 +1,3 @@
----
-home: true
----
-
 # Running circuits
 
 A circuit can give you four kinds of result. Each call simulates the whole circuit from |0…0⟩ again, so you can call them as often as you like and the circuit never changes.
