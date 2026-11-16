@@ -7,8 +7,13 @@
 `●` marks a control, `×` the two ends of a swap, `M→c0` a measurement into
 classical bit 0, `|0⟩` a reset, and `X if c1=1` a gate inside an `if_test`.
 
-shortcut: columns are never packed or folded, so a long circuit draws as one very wide line; add folding if learners hit it.
+A drawing wider than FOLD characters continues in a new block below, separated
+by a blank line, so long circuits stay readable in a terminal or notebook.
+
+shortcut: columns are never packed, so gates on different qubits still take one column each.
 """
+
+FOLD = 80  # characters per line before the drawing continues below
 
 # Method name -> symbol drawn on the target wire.
 SYMBOLS = {
@@ -37,7 +42,8 @@ def draw(circuit) -> str:
     n = circuit.num_qubits
     name_w = len(f"q{max(n - 1, 0)}")
     # Even rows are qubit wires, odd rows the gaps between them.
-    rows = [f"{f'q{r // 2}':>{name_w}}: ─" if r % 2 == 0 else " " * (name_w + 3) for r in range(max(2 * n - 1, 0))]
+    names = [f"{f'q{r // 2}':>{name_w}}: ─" if r % 2 == 0 else " " * (name_w + 3) for r in range(max(2 * n - 1, 0))]
+    blocks, rows = [], list(names)
 
     for kind, name, params, controls, targets, condition, clbit in circuit._ops():
         label = _label(kind, name, params, condition, clbit)
@@ -51,6 +57,10 @@ def draw(circuit) -> str:
         def at(ch, fill):
             return fill * mid + ch + fill * (w - mid - 1)
 
+        # Start a new block when this column would overflow the line, unless the block is still empty.
+        if rows and len(rows[0]) + w > FOLD and len(rows[0]) > len(names[0]):
+            blocks.append(rows)
+            rows = list(names)
         for r in range(len(rows)):
             q, inside = r // 2, lo <= r <= hi
             if r % 2 == 0 and q in marks:
@@ -62,4 +72,5 @@ def draw(circuit) -> str:
             else:
                 cell = at("│", " ") if inside else " " * w
             rows[r] += cell
-    return "\n".join(row.rstrip() for row in rows)
+    blocks.append(rows)
+    return "\n\n".join("\n".join(row.rstrip() for row in block) for block in blocks)

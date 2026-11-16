@@ -13,6 +13,8 @@ A circuit can give you four kinds of result. Each call simulates the whole circu
 
 `print(qc)` draws the gates recorded so far, one wire per qubit with qubit 0 on top. `●` marks a control qubit and `×` the two ends of a swap. Drawing does not run the circuit.
 
+A drawing wider than 80 characters folds: it continues in a new block below, after a blank line, with the qubit names repeated, so long circuits stay readable in a terminal or notebook.
+
 ```python
 qc = qsengine.QuantumCircuit(3)
 qc.h(0)

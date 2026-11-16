@@ -273,6 +273,22 @@ def test_print_draws_the_circuit():
     assert str(qc) == "q0: ──H──●─\n         │\nq1: ─────X─"
 
 
+def test_print_folds_long_circuits():
+    qc = qsengine.QuantumCircuit(2)
+    for _ in range(30):
+        qc.h(0)
+    qc.cx(0, 1)
+    text = str(qc)
+    # Split at the blank line before each repeated "q0:"; the empty gap row between q0 and q1 is also a blank line.
+    blocks = text.split("\n\nq0: ")
+    assert text.startswith("q0: ")
+    # Each H column is 3 wide after the 5-character "q0: ─", so 25 fit in 80 characters.
+    assert [b.count("H") for b in blocks] == [25, 5]
+    assert all(len(line) <= 80 for line in text.splitlines())
+    assert all("\nq1: ─" in b for b in blocks)
+    assert blocks[1].endswith("X─")
+
+
 def test_repr_and_len():
     qc = qsengine.QuantumCircuit(2)
     qc.h(0)
