@@ -38,7 +38,7 @@ Returns int.
 
 ### `print(qc)`, `str(qc)`
 
-A text drawing of the circuit, one wire per qubit with qubit 0 on top. ● marks a control, × the ends of a swap.
+A text drawing of the circuit, one wire per qubit with qubit 0 on top. ● marks a control, × the ends of a swap. A drawing wider than 80 characters continues in a new block below, after a blank line.
 
 Returns str.
 

@@ -1,5 +1,15 @@
 # Release notes
 
+## Unreleased (Version 1.1.2)
+
+### Changes
+
+- `print(qc)` folds drawings wider than 80 characters into blocks, one below the other, instead of drawing one very wide line.
+
+### Documentation
+
+- Point links to [qscommons.prg](https://qscommons.org/)
+
 ## Version 1.1.1
 
 Two fixes. Code that worked in 1.1.0 runs unchanged.
