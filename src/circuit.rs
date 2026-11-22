@@ -68,8 +68,11 @@ pub enum Instruction {
     /// arguments of [`QuantumBackend::apply_gate_kernel`]. With a `condition`,
     /// only in shots whose classical bits match it.
     Gate { control_mask: usize, target: usize, gate: Gate, label: Label, condition: Option<Condition> },
-    /// Swap two qubits; run as three CNOTs, kept as one operation for drawing.
-    Swap { a: usize, b: usize, condition: Option<Condition> },
+    /// A gate on several qubits that runs as a few controlled 2x2 gates (see
+    /// `composite_steps`), kept as one operation for drawing and `len`: `swap`,
+    /// `cswap`, `rxx`, `ryy` or `rzz`, named by `label`. `qubits` are the method's
+    /// qubit arguments in order; the third is unused by the two-qubit gates.
+    Composite { label: Label, qubits: [usize; 3], condition: Option<Condition> },
     /// Measure `qubit` and store the outcome in classical bit `clbit`.
     Measure { qubit: usize, clbit: usize },
     /// Put `qubit` back to |0>.
@@ -182,10 +185,65 @@ impl QuantumCircuit {
     pub fn ccx(&mut self, c1: usize, c2: usize, target: usize) -> Result<()> {
         self.push(Label::new("ccx", &[]), &[c1, c2], target, gates::X)
     }
+    pub fn sx(&mut self, q: usize) -> Result<()> { self.push(Label::new("sx", &[]), &[], q, gates::SX) }
+    pub fn sxdg(&mut self, q: usize) -> Result<()> { self.push(Label::new("sxdg", &[]), &[], q, gates::SXDG) }
+    pub fn cy(&mut self, control: usize, target: usize) -> Result<()> {
+        self.push(Label::new("cy", &[]), &[control], target, gates::Y)
+    }
+    pub fn ch(&mut self, control: usize, target: usize) -> Result<()> {
+        self.push(Label::new("ch", &[]), &[control], target, gates::H)
+    }
+    pub fn crx(&mut self, control: usize, target: usize, theta: f64) -> Result<()> {
+        self.push(Label::new("crx", &[theta]), &[control], target, gates::rx(theta))
+    }
+    pub fn cry(&mut self, control: usize, target: usize, theta: f64) -> Result<()> {
+        self.push(Label::new("cry", &[theta]), &[control], target, gates::ry(theta))
+    }
+    /// Flip `target` when every qubit in `controls` is |1>: any number of controls.
+    pub fn mcx(&mut self, controls: &[usize], target: usize) -> Result<()> {
+        self.push(Label::new("mcx", &[]), controls, target, gates::X)
+    }
+
     /// Swap two qubits (run as three CNOTs: the kernel only knows controlled 2x2 gates).
     pub fn swap(&mut self, a: usize, b: usize) -> Result<()> {
-        control_mask(self.num_qubits, &[a], b)?;
-        self.instructions.push(Instruction::Swap { a, b, condition: self.condition });
+        self.push_composite(Label::new("swap", &[]), [a, b, 0])
+    }
+    /// Fredkin: swap `a` and `b` when `control` is |1>.
+    pub fn cswap(&mut self, control: usize, a: usize, b: usize) -> Result<()> {
+        self.push_composite(Label::new("cswap", &[]), [control, a, b])
+    }
+    /// exp(-i theta/2 X⊗X) on `a` and `b`.
+    pub fn rxx(&mut self, a: usize, b: usize, theta: f64) -> Result<()> {
+        self.push_composite(Label::new("rxx", &[theta]), [a, b, 0])
+    }
+    /// exp(-i theta/2 Y⊗Y) on `a` and `b`.
+    pub fn ryy(&mut self, a: usize, b: usize, theta: f64) -> Result<()> {
+        self.push_composite(Label::new("ryy", &[theta]), [a, b, 0])
+    }
+    /// exp(-i theta/2 Z⊗Z) on `a` and `b`: a phase that depends on their parity.
+    pub fn rzz(&mut self, a: usize, b: usize, theta: f64) -> Result<()> {
+        self.push_composite(Label::new("rzz", &[theta]), [a, b, 0])
+    }
+
+    /// Validate and record a [`Instruction::Composite`].
+    fn push_composite(&mut self, label: Label, qubits: [usize; 3]) -> Result<()> {
+        let n = if label.name == "cswap" { 3 } else { 2 };
+        control_mask(self.num_qubits, &qubits[..n - 1], qubits[n - 1])?;
+        if !label.params().iter().all(|a| a.is_finite()) {
+            return Err(QsError::NonFinite);
+        }
+        self.instructions.push(Instruction::Composite { label, qubits, condition: self.condition });
+        Ok(())
+    }
+
+    /// Measure every qubit into the classical bit of the same number, adding
+    /// classical bits first if there are fewer than qubits.
+    pub fn measure_all(&mut self) -> Result<()> {
+        self.check_unconditioned("measure_all")?;
+        self.num_clbits = self.num_clbits.max(self.num_qubits);
+        for q in 0..self.num_qubits {
+            self.instructions.push(Instruction::Measure { qubit: q, clbit: q });
+        }
         Ok(())
     }
 
@@ -301,54 +359,30 @@ impl QuantumCircuit {
     ) -> Result<()> {
         // pending[q] = product of single-qubit gates on q not yet sent to the backend.
         let mut pending: Vec<Option<Gate>> = vec![None; self.num_qubits];
-        // Instructions were validated when recorded, so the unchecked kernel is safe to call.
-        let flush = |q: usize, backend: &mut dyn QuantumBackend, pending: &mut [Option<Gate>]| {
-            if let Some(g) = pending[q].take() {
-                backend.apply_gate_kernel(0, q, &g);
-            }
-        };
         let skipped = |condition: &Option<Condition>, clbits: usize| condition.is_some_and(|c| !c.holds(clbits));
 
         for ins in instructions {
             match ins {
-                Instruction::Gate { condition, .. } | Instruction::Swap { condition, .. } if skipped(condition, *clbits) => {}
-                &Instruction::Gate { control_mask: 0, target, ref gate, .. } => {
-                    let slot = &mut pending[target];
-                    *slot = Some(match slot.take() {
-                        Some(earlier) => gates::matmul(gate, &earlier),
-                        None => *gate,
-                    });
-                }
+                Instruction::Gate { condition, .. } | Instruction::Composite { condition, .. } if skipped(condition, *clbits) => {}
                 &Instruction::Gate { control_mask, target, ref gate, .. } => {
-                    // Flush every qubit this gate touches: the target and each control bit.
-                    flush(target, backend, &mut pending);
-                    let mut mask = control_mask;
-                    while mask != 0 {
-                        flush(mask.trailing_zeros() as usize, backend, &mut pending);
-                        mask &= mask - 1; // clear the lowest set bit
-                    }
-                    backend.apply_gate_kernel(control_mask, target, gate);
+                    apply(backend, &mut pending, control_mask, target, gate)
                 }
-                &Instruction::Swap { a, b, .. } => {
-                    flush(a, backend, &mut pending);
-                    flush(b, backend, &mut pending);
-                    for (c, t) in [(a, b), (b, a), (a, b)] {
-                        backend.apply_gate_kernel(1 << c, t, &gates::X);
-                    }
+                Instruction::Composite { label, qubits, .. } => {
+                    composite_steps(label, *qubits, &mut |mask, target, gate| apply(backend, &mut pending, mask, target, &gate))
                 }
                 &Instruction::Measure { qubit, clbit } => {
-                    flush(qubit, backend, &mut pending);
+                    flush(backend, &mut pending, qubit);
                     let one = backend.measure_qubit(qubit, rng)?;
                     *clbits = (*clbits & !(1 << clbit)) | (usize::from(one) << clbit);
                 }
                 &Instruction::Reset { qubit } => {
-                    flush(qubit, backend, &mut pending);
+                    flush(backend, &mut pending, qubit);
                     backend.reset_qubit(qubit, rng)?;
                 }
             }
         }
         for q in 0..self.num_qubits {
-            flush(q, backend, &mut pending);
+            flush(backend, &mut pending, q);
         }
         Ok(())
     }
@@ -425,6 +459,78 @@ impl QuantumCircuit {
             *out.entry(key).or_insert(0) += 1;
         }
         Ok(out)
+    }
+}
+
+/// Send `pending[q]` to the backend, if there is one.
+/// Instructions were validated when recorded, so the unchecked kernel is safe to call.
+fn flush(backend: &mut dyn QuantumBackend, pending: &mut [Option<Gate>], q: usize) {
+    if let Some(g) = pending[q].take() {
+        backend.apply_gate_kernel(0, q, &g);
+    }
+}
+
+/// Apply one gate with fusion: a single-qubit gate joins `pending[target]`; a
+/// controlled gate first flushes every qubit it touches, then runs.
+fn apply(backend: &mut dyn QuantumBackend, pending: &mut [Option<Gate>], control_mask: usize, target: usize, gate: &Gate) {
+    if control_mask == 0 {
+        let slot = &mut pending[target];
+        *slot = Some(match slot.take() {
+            Some(earlier) => gates::matmul(gate, &earlier),
+            None => *gate,
+        });
+        return;
+    }
+    flush(backend, pending, target);
+    let mut mask = control_mask;
+    while mask != 0 {
+        flush(backend, pending, mask.trailing_zeros() as usize);
+        mask &= mask - 1; // clear the lowest set bit
+    }
+    backend.apply_gate_kernel(control_mask, target, gate);
+}
+
+/// Call `step(control_mask, target, gate)` for each gate a [`Instruction::Composite`]
+/// runs as, in order. The kernel only knows controlled 2x2 gates, so:
+///
+/// - `swap(a, b)` is `cx(a, b)`, `cx(b, a)`, `cx(a, b)`.
+/// - `cswap(c, a, b)` is `cx(b, a)`, `ccx(c, a, b)`, `cx(b, a)`.
+/// - `rzz(a, b, θ)` is `cx(a, b)`, `rz(b, θ)`, `cx(a, b)`: the parity of a and b lands on b.
+/// - `rxx` and `ryy` are `rzz` in another basis: H on both qubits before and after,
+///   or RX(π/2) before and RX(-π/2) after.
+fn composite_steps(label: &Label, [a, b, c]: [usize; 3], step: &mut dyn FnMut(usize, usize, Gate)) {
+    use std::f64::consts::FRAC_PI_2;
+    match label.name {
+        "swap" => {
+            for (ctl, t) in [(a, b), (b, a), (a, b)] {
+                step(1 << ctl, t, gates::X);
+            }
+        }
+        // Here a is the control and b, c the swapped pair.
+        "cswap" => {
+            step(1 << c, b, gates::X);
+            step(1 << a | 1 << b, c, gates::X);
+            step(1 << c, b, gates::X);
+        }
+        "rxx" | "ryy" | "rzz" => {
+            let basis = match label.name {
+                "rxx" => Some((gates::H, gates::H)),
+                "ryy" => Some((gates::rx(FRAC_PI_2), gates::rx(-FRAC_PI_2))),
+                _ => None,
+            };
+            if let Some((before, _)) = basis {
+                step(0, a, before);
+                step(0, b, before);
+            }
+            step(1 << a, b, gates::X);
+            step(0, b, gates::rz(label.params()[0]));
+            step(1 << a, b, gates::X);
+            if let Some((_, after)) = basis {
+                step(0, a, after);
+                step(0, b, after);
+            }
+        }
+        other => unreachable!("{other} is not a composite gate"),
     }
 }
 

@@ -6,6 +6,7 @@
 
 `●` marks a control, `×` the two ends of a swap, `M→c0` a measurement into
 classical bit 0, `|0⟩` a reset, and `X if c1=1` a gate inside an `if_test`.
+A gate on a pair of qubits (`rzz`, `rxx`, `ryy`) draws its label on both.
 
 A drawing wider than FOLD characters continues in a new block below, separated
 by a blank line, so long circuits stay readable in a terminal or notebook.
@@ -19,7 +20,9 @@ FOLD = 80  # characters per line before the drawing continues below
 SYMBOLS = {
     "x": "X", "y": "Y", "z": "Z", "h": "H", "s": "S", "t": "T", "sdg": "S†", "tdg": "T†",
     "rx": "RX", "ry": "RY", "rz": "RZ", "p": "P", "u": "U", "unitary": "U",
-    "cx": "X", "cz": "Z", "cp": "P", "crz": "RZ", "ccx": "X",
+    "sx": "√X", "sxdg": "√X†",
+    "cx": "X", "cy": "Y", "cz": "Z", "ch": "H", "cp": "P", "crx": "RX", "cry": "RY", "crz": "RZ",
+    "ccx": "X", "mcx": "X", "swap": "×", "cswap": "×", "rxx": "RXX", "ryy": "RYY", "rzz": "RZZ",
 }
 
 
@@ -28,7 +31,7 @@ def _label(kind, name, params, condition, clbit):
         return f"M→c{clbit}"
     if kind == "reset":
         return "|0⟩"
-    text = "×" if kind == "swap" else SYMBOLS[name]
+    text = SYMBOLS[name]
     if params:
         text += "(" + ",".join(f"{a:.2f}" for a in params) + ")"
     if condition is not None:
@@ -47,8 +50,8 @@ def draw(circuit) -> str:
 
     for kind, name, params, controls, targets, condition, clbit in circuit._ops():
         label = _label(kind, name, params, condition, clbit)
-        # A swap draws × on both qubits (its condition, if any, on the first); everything else its label on the target.
-        marks = {targets[1]: "×", targets[0]: label} if kind == "swap" else {targets[0]: label}
+        # A gate with two targets (swap, cswap, rxx, ryy, rzz) draws on both, its condition (if any) only on the first.
+        marks = {t: _label(kind, name, params, None, clbit) for t in targets[1:]} | {targets[0]: label}
         w = max(len(m) for m in marks.values()) + 2
         mid = w // 2
         qubits = controls + targets

@@ -22,7 +22,7 @@ Raises ValueError if either is above its maximum.
 
 ### `qc.num_qubits`, `qc.num_clbits`
 
-The number of qubits and of classical bits. Read-only.
+The number of qubits and of classical bits. Read-only; `measure_all()` is the one call that adds classical bits.
 
 Returns int.
 
@@ -30,7 +30,7 @@ Returns int.
 
 ### `len(qc)`
 
-The number of operations recorded so far: gates, measurements and resets. A swap counts as one.
+The number of operations recorded so far: gates, measurements and resets. A swap, cswap, rxx, ryy or rzz counts as one.
 
 Returns int.
 
@@ -44,7 +44,7 @@ Returns str.
 
 <a id="single"></a>
 
-### `qc.h(q)`, `qc.x(q)`, `qc.y(q)`, `qc.z(q)`, `qc.s(q)`, `qc.sdg(q)`, `qc.t(q)`, `qc.tdg(q)`
+### `qc.h(q)`, `qc.x(q)`, `qc.y(q)`, `qc.z(q)`, `qc.s(q)`, `qc.sdg(q)`, `qc.t(q)`, `qc.tdg(q)`, `qc.sx(q)`, `qc.sxdg(q)`
 
 Record a single-qubit gate on qubit q.
 
@@ -68,9 +68,9 @@ Raises ValueError if q is out of range or an angle is NaN or infinite.
 
 <a id="two-qubit"></a>
 
-### `qc.cx(control, target)`, `qc.cz(control, target)`, `qc.cp(control, target, lam)`, `qc.crz(control, target, theta)`
+### `qc.cx(control, target)`, `qc.cy(control, target)`, `qc.cz(control, target)`, `qc.ch(control, target)`, `qc.cp(control, target, lam)`, `qc.crx(control, target, theta)`, `qc.cry(control, target, theta)`, `qc.crz(control, target, theta)`
 
-Record a CNOT, controlled-Z, controlled-phase or controlled-RZ gate.
+Record a CNOT, controlled-Y, controlled-Z, controlled-Hadamard, controlled-phase, or controlled RX, RY or RZ gate.
 
 Raises ValueError if a qubit is out of range, control equals target, or an angle is NaN or infinite.
 
@@ -78,15 +78,39 @@ Raises ValueError if a qubit is out of range, control equals target, or an angle
 
 ### `qc.swap(qubit1, qubit2)`
 
-Record a SWAP, as three CNOTs.
+Record a SWAP, run as three CNOTs and counted as one operation.
 
 Raises ValueError if a qubit is out of range or the two are equal.
+
+<a id="two-qubit-rotations"></a>
+
+### `qc.rxx(qubit1, qubit2, theta)`, `qc.ryy(qubit1, qubit2, theta)`, `qc.rzz(qubit1, qubit2, theta)`
+
+Record exp(-iθ P⊗P/2) on the two qubits, for P = X, Y or Z. Each is one operation.
+
+Raises ValueError if a qubit is out of range, the two are equal, or the angle is NaN or infinite.
 
 <a id="ccx"></a>
 
 ### `qc.ccx(control1, control2, target)`
 
 Record a Toffoli gate.
+
+Raises ValueError if a qubit is out of range or used twice.
+
+<a id="cswap"></a>
+
+### `qc.cswap(control, qubit1, qubit2)`
+
+Record a Fredkin gate: swap qubit1 and qubit2 where control is |1⟩. One operation.
+
+Raises ValueError if a qubit is out of range or used twice.
+
+<a id="mcx"></a>
+
+### `qc.mcx(controls, target)`
+
+Record an X on target, applied only where every qubit in the list controls is |1⟩. Takes any number of controls, as Python or NumPy integers.
 
 Raises ValueError if a qubit is out of range or used twice.
 
@@ -97,6 +121,14 @@ Raises ValueError if a qubit is out of range or used twice.
 Measure qubit into classical bit clbit, part-way through the circuit or at the end. Both may be equal-length lists, as in `qc.measure([0, 1], [0, 1])`, of Python or NumPy integers.
 
 Raises ValueError if a qubit or classical bit is out of range, or inside if_test.
+
+<a id="measure-all"></a>
+
+### `qc.measure_all()`
+
+Measure every qubit, qubit i into classical bit i. If the circuit has fewer classical bits than qubits, it first gets more, up to one per qubit; existing classical bits are kept.
+
+Raises ValueError inside if_test.
 
 <a id="reset"></a>
 

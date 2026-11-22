@@ -101,7 +101,7 @@ print(sum(n for bits, n in counts.items() if bits[0] == "1"))
 700
 ```
 
-`reset(qubit)` puts a qubit back to |0⟩, so one qubit can be measured and reused. A `with qc.if_test([0, 1], 0b10):` block tests several bits at once: bit *i* of the value is the value required of the *i*-th bit in the list.
+`measure_all()` measures qubit *i* into classical bit *i* for every qubit, and adds classical bits first if the circuit has too few, so `QuantumCircuit(3)` followed by `measure_all()` needs no classical bits up front. `reset(qubit)` puts a qubit back to |0⟩, so one qubit can be measured and reused. A `with qc.if_test([0, 1], 0b10):` block tests several bits at once: bit *i* of the value is the value required of the *i*-th bit in the list.
 
 A circuit that measures and then keeps going is in a different random state in every shot, so qsengine simulates each shot on its own. That costs `shots` times as much as a circuit that only measures at the end, which is still simulated once and sampled. For the same reason `statevector()`, `probabilities()` and `expectation()` raise `ValueError` for such a circuit; measurements at the very end are simply ignored by them.
 

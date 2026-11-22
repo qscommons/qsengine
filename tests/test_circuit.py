@@ -73,6 +73,36 @@ def toffoli(n, c1, c2, t):
     return np.eye(2**n) - full(n, {c1: P1, c2: P1}) + full(n, {c1: P1, c2: P1, t: X})
 
 
+SX = np.array([[1 + 1j, 1 - 1j], [1 - 1j, 1 + 1j]]) / 2
+
+
+def pauli_rotation(n, a, b, P, t):
+    """exp(-i t/2 P⊗P) = cos(t/2) I - i sin(t/2) P⊗P, since (P⊗P)² = I."""
+    return math.cos(t / 2) * np.eye(2**n) - 1j * math.sin(t / 2) * full(n, {a: P, b: P})
+
+
+def permutation(n, f):
+    """The matrix sending basis state |i> to |f(i)>."""
+    out = np.zeros((2**n, 2**n), dtype=complex)
+    for i in range(2**n):
+        out[f(i), i] = 1
+    return out
+
+
+def cswap(n, c, a, b):
+    """Swap bits a and b of every basis index whose bit c is 1."""
+    def f(i):
+        if i >> c & 1 and (i >> a & 1) != (i >> b & 1):
+            return i ^ (1 << a | 1 << b)
+        return i
+    return permutation(n, f)
+
+
+def mcx(n, controls, t):
+    """Flip bit t of every basis index whose control bits are all 1."""
+    return permutation(n, lambda i: i ^ (1 << t) if all(i >> c & 1 for c in controls) else i)
+
+
 class Reference:
     """Mirror of QuantumCircuit that records the same gates as NumPy matrices."""
 
@@ -91,7 +121,7 @@ class Reference:
 def build_pair(n, gates):
     """Apply the same gate list to a qsengine circuit and to the reference."""
     qc, ref = qsengine.QuantumCircuit(n), Reference(n)
-    singles = {"x": X, "y": Y, "z": Z, "h": H, "s": S, "t": T, "sdg": SDG, "tdg": TDG}
+    singles = {"x": X, "y": Y, "z": Z, "h": H, "s": S, "t": T, "sdg": SDG, "tdg": TDG, "sx": SX, "sxdg": SX.conj().T}
     rotations = {"rx": RX, "ry": RY, "rz": RZ, "p": P}
     for name, *args in gates:
         getattr(qc, name)(*args)
@@ -101,16 +131,22 @@ def build_pair(n, gates):
             ref.one(rotations[name](args[1]), args[0])
         elif name == "u":
             ref.one(U(*args[1:]), args[0])
-        elif name in ("cp", "crz"):
-            ref.two({"cp": P, "crz": RZ}[name](args[2]), args[0], args[1])
+        elif name in ("cp", "crx", "cry", "crz"):
+            ref.two({"cp": P, "crx": RX, "cry": RY, "crz": RZ}[name](args[2]), args[0], args[1])
+        elif name in ("rxx", "ryy", "rzz"):
+            ref.state = pauli_rotation(n, args[0], args[1], {"rxx": X, "ryy": Y, "rzz": Z}[name], args[2]) @ ref.state
         elif name == "ccx":
             ref.state = toffoli(n, *args) @ ref.state
+        elif name == "cswap":
+            ref.state = cswap(n, *args) @ ref.state
+        elif name == "mcx":
+            ref.state = mcx(n, *args) @ ref.state
         elif name == "swap":
             a, b = args
             for c, t in ((a, b), (b, a), (a, b)):
                 ref.two(X, c, t)
         else:
-            ref.two({"cx": X, "cz": Z}[name], *args)
+            ref.two({"cx": X, "cy": Y, "cz": Z, "ch": H}[name], *args)
     return qc, ref
 
 
@@ -190,6 +226,75 @@ def test_swap_moves_a_bit():
     qc.x(0)
     qc.swap(0, 2)
     assert qc.run(shots=10, seed=0) == {"100": 10}
+
+
+@pytest.mark.parametrize("backend,tol", BACKENDS)
+def test_standard_gates_against_numpy(backend, tol):
+    # Qubits in both orders and not adjacent; rotations in between so the
+    # basis changes inside rxx and ryy fuse with neighbouring gates.
+    gates = [("h", q) for q in range(5)] + [
+        ("sx", 0), ("sxdg", 3), ("ry", 2, 0.4), ("cy", 4, 1), ("ch", 0, 3), ("crx", 2, 0, 0.8), ("cry", 1, 4, -1.4),
+        ("rzz", 0, 3, 0.7), ("rx", 0, 0.2), ("rxx", 4, 1, -1.1), ("ryy", 2, 0, 2.5), ("t", 2),
+        ("cswap", 1, 4, 0), ("cswap", 3, 0, 2), ("mcx", [0, 2, 3], 4), ("mcx", [4], 1), ("h", 0),
+    ]
+    qc, ref = build_pair(5, gates)
+    np.testing.assert_allclose(qc.statevector(backend=backend), ref.state, atol=tol)
+
+
+def test_mcx_matches_ccx_and_counts_as_one_gate():
+    a, b = qsengine.QuantumCircuit(4), qsengine.QuantumCircuit(4)
+    for qc in (a, b):
+        qc.x(0)
+        qc.x(2)
+        qc.x(3)
+    a.mcx([0, 2, 3], 1)
+    b.mcx(np.array([0, 2]), 1)  # only two of three controls: still flips
+    assert a.run(shots=5, seed=0) == {"1111": 5} == b.run(shots=5, seed=0)
+    assert len(a) == 4
+
+
+def test_measure_all_adds_classical_bits_if_needed():
+    qc = qsengine.QuantumCircuit(3)
+    qc.x(1)
+    qc.measure_all()
+    assert qc.num_clbits == 3 and len(qc) == 4
+    assert qc.run(shots=10, seed=0) == {"010": 10}
+    # More classical bits than qubits: none added, qubit i still goes to bit i.
+    qc = qsengine.QuantumCircuit(2, 4)
+    qc.x(0)
+    qc.measure_all()
+    assert qc.num_clbits == 4
+    assert qc.run(shots=10, seed=0) == {"0001": 10}
+    with qc.if_test(0, 1):
+        with pytest.raises(ValueError, match="if_test"):
+            qc.measure_all()
+
+
+def test_new_gates_reject_bad_arguments():
+    qc = qsengine.QuantumCircuit(3)
+    with pytest.raises(ValueError, match="more than once"):
+        qc.cswap(0, 1, 1)
+    with pytest.raises(ValueError, match="more than once"):
+        qc.mcx([0, 0], 1)
+    with pytest.raises(ValueError, match="more than once"):
+        qc.rzz(2, 2, 0.5)
+    with pytest.raises(ValueError, match="out of range"):
+        qc.mcx([0, 1], 3)
+    with pytest.raises(ValueError, match="finite"):
+        qc.rxx(0, 1, float("nan"))
+    assert len(qc) == 0
+
+
+def test_print_draws_the_new_gates():
+    qc = qsengine.QuantumCircuit(2)
+    qc.rzz(0, 1, 0.5)
+    assert str(qc) == "q0: ──RZZ(0.50)─\n          │\nq1: ──RZZ(0.50)─"
+    qc = qsengine.QuantumCircuit(3)
+    qc.sx(0)
+    qc.cswap(0, 1, 2)
+    qc.mcx([0, 1], 2)
+    text = str(qc)
+    assert "√X" in text and text.count("×") == 2 and text.count("●") == 3
 
 
 def test_unitary_matches_named_gate():

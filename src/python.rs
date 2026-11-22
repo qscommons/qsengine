@@ -103,7 +103,14 @@ impl PyQuantumCircuit {
                 Instruction::Gate { control_mask, target, label, condition, .. } => {
                     ("gate", label.name, label.params().to_vec(), bits(*control_mask), vec![*target], cond(condition), None)
                 }
-                Instruction::Swap { a, b, condition } => ("swap", "swap", vec![], vec![], vec![*a, *b], cond(condition), None),
+                // cswap's first qubit is its control; every other composite acts on its qubits as targets.
+                Instruction::Composite { label, qubits, condition } => {
+                    let (controls, targets) = match label.name {
+                        "cswap" => (vec![qubits[0]], vec![qubits[1], qubits[2]]),
+                        _ => (vec![], vec![qubits[0], qubits[1]]),
+                    };
+                    ("gate", label.name, label.params().to_vec(), controls, targets, cond(condition), None)
+                }
                 Instruction::Measure { qubit, clbit } => ("measure", "measure", vec![], vec![], vec![*qubit], None, Some(*clbit)),
                 Instruction::Reset { qubit } => ("reset", "reset", vec![], vec![], vec![*qubit], None, None),
             })
@@ -172,8 +179,40 @@ impl PyQuantumCircuit {
     fn ccx(&mut self, control1: usize, control2: usize, target: usize) -> PyResult<()> {
         Ok(self.inner.ccx(control1, control2, target)?)
     }
-    /// Swap the states of `qubit1` and `qubit2` (recorded as three CNOTs).
+    /// Swap the states of `qubit1` and `qubit2` (run as three CNOTs).
     fn swap(&mut self, qubit1: usize, qubit2: usize) -> PyResult<()> { Ok(self.inner.swap(qubit1, qubit2)?) }
+    /// SX (square root of X) on `qubit`: applied twice it is X.
+    fn sx(&mut self, qubit: usize) -> PyResult<()> { Ok(self.inner.sx(qubit)?) }
+    /// SX-dagger (inverse of SX) on `qubit`.
+    fn sxdg(&mut self, qubit: usize) -> PyResult<()> { Ok(self.inner.sxdg(qubit)?) }
+    /// Controlled-Y: apply Y to `target` when `control` is |1>.
+    fn cy(&mut self, control: usize, target: usize) -> PyResult<()> { Ok(self.inner.cy(control, target)?) }
+    /// Controlled-Hadamard: apply H to `target` when `control` is |1>.
+    fn ch(&mut self, control: usize, target: usize) -> PyResult<()> { Ok(self.inner.ch(control, target)?) }
+    /// Controlled RX: rotate `target` about X by `theta` when `control` is |1>.
+    fn crx(&mut self, control: usize, target: usize, theta: f64) -> PyResult<()> {
+        Ok(self.inner.crx(control, target, theta)?)
+    }
+    /// Controlled RY: rotate `target` about Y by `theta` when `control` is |1>.
+    fn cry(&mut self, control: usize, target: usize, theta: f64) -> PyResult<()> {
+        Ok(self.inner.cry(control, target, theta)?)
+    }
+    /// Multi-controlled X: flip `target` when every qubit in `controls` is |1>.
+    fn mcx(&mut self, controls: Vec<usize>, target: usize) -> PyResult<()> { Ok(self.inner.mcx(&controls, target)?) }
+    /// Fredkin (controlled swap): swap `qubit1` and `qubit2` when `control` is |1>.
+    fn cswap(&mut self, control: usize, qubit1: usize, qubit2: usize) -> PyResult<()> {
+        Ok(self.inner.cswap(control, qubit1, qubit2)?)
+    }
+    /// RXX: exp(-i theta/2 X⊗X) on `qubit1` and `qubit2`.
+    fn rxx(&mut self, qubit1: usize, qubit2: usize, theta: f64) -> PyResult<()> { Ok(self.inner.rxx(qubit1, qubit2, theta)?) }
+    /// RYY: exp(-i theta/2 Y⊗Y) on `qubit1` and `qubit2`.
+    fn ryy(&mut self, qubit1: usize, qubit2: usize, theta: f64) -> PyResult<()> { Ok(self.inner.ryy(qubit1, qubit2, theta)?) }
+    /// RZZ: exp(-i theta/2 Z⊗Z) on `qubit1` and `qubit2`.
+    fn rzz(&mut self, qubit1: usize, qubit2: usize, theta: f64) -> PyResult<()> { Ok(self.inner.rzz(qubit1, qubit2, theta)?) }
+
+    /// Measure every qubit into the classical bit of the same number, adding
+    /// classical bits first if the circuit has fewer than qubits.
+    fn measure_all(&mut self) -> PyResult<()> { Ok(self.inner.measure_all()?) }
 
     /// Apply any 2x2 unitary `matrix` (nested lists or a NumPy array) to `target`,
     /// optionally only where every qubit in `controls` is |1>. A matrix within 1e-9
