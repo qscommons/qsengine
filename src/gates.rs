@@ -57,6 +57,12 @@ pub const SDG: Gate = [[I, O], [O, c(0.0, -1.0)]];
 /// T-dagger, the inverse of T: |1> -> e^(-i*pi/4)|1>.
 pub const TDG: Gate = [[I, O], [O, c(FRAC_1_SQRT_2, -FRAC_1_SQRT_2)]];
 
+/// SX (sqrt X): applied twice it is X. `[[1+i, 1-i], [1-i, 1+i]] / 2`.
+pub const SX: Gate = [[c(0.5, 0.5), c(0.5, -0.5)], [c(0.5, -0.5), c(0.5, 0.5)]];
+
+/// SX-dagger, the inverse of SX.
+pub const SXDG: Gate = [[c(0.5, -0.5), c(0.5, 0.5)], [c(0.5, 0.5), c(0.5, -0.5)]];
+
 /// Phase gate: |1> -> e^(i*lambda)|1>. `p(pi)` is Z, `p(pi/2)` is S.
 pub fn p(lambda: f64) -> Gate {
     [[I, O], [O, Complex64::from_polar(1.0, lambda)]]
@@ -141,7 +147,7 @@ mod tests {
 
     #[test]
     fn all_gates_are_unitary() {
-        for g in [ID, X, Y, Z, H, S, T, SDG, TDG, rx(0.3), ry(1.1), rz(-2.0), p(0.7), u(0.4, -1.3, 2.2)] {
+        for g in [ID, X, Y, Z, H, S, T, SDG, TDG, SX, SXDG, rx(0.3), ry(1.1), rz(-2.0), p(0.7), u(0.4, -1.3, 2.2)] {
             assert!(is_unitary(&g, 1e-12), "not unitary: {g:?}");
         }
         assert!(!is_unitary(&[[I, I], [O, I]], 1e-9));
@@ -174,6 +180,8 @@ mod tests {
         let close = |a: &Gate, b: &Gate| (0..2).all(|r| (0..2).all(|k| (a[r][k] - b[r][k]).norm() < 1e-12));
         assert!(close(&matmul(&S, &SDG), &ID));
         assert!(close(&matmul(&T, &TDG), &ID));
+        assert!(close(&matmul(&SX, &SX), &X));
+        assert!(close(&matmul(&SX, &SXDG), &ID));
         assert!(close(&p(std::f64::consts::FRAC_PI_2), &S));
         assert!(close(&u(std::f64::consts::FRAC_PI_2, 0.0, std::f64::consts::PI), &H));
     }

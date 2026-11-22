@@ -5,10 +5,13 @@
 ### Changes
 
 - `print(qc)` folds drawings wider than 80 characters into blocks, one below the other, instead of drawing one very wide line.
+- Eleven more standard gates, so common circuits no longer need hand-written `unitary()` matrices: `sx` and `sxdg`; the controlled gates `cy`, `ch`, `crx` and `cry`; the two-qubit rotations `rxx`, `ryy` and `rzz`; the Fredkin gate `cswap`; and `mcx`, an X gate with any number of controls. See [Gates](gates.md).
+- `qc.measure_all()` measures qubit i into classical bit i for every qubit, adding classical bits first if the circuit has fewer than qubits.
+- `rxx`, `ryy`, `rzz` and `cswap` count as one operation in `len(qc)` and draw as one column, like `swap`.
 
 ### Documentation
 
-- Point links to [qscommons.prg](https://qscommons.org/)
+- Point links to [qscommons.org](https://qscommons.org/)
 
 ## Version 1.1.1
 

@@ -25,7 +25,7 @@ print(qc.run(shots=1000, seed=1))   # {'00': 513, '11': 487}
 - **Fast where it counts.** Small circuits run on the CPU with almost no per-call overhead; from 14 qubits up, the GPU takes over. On a 22-qubit benchmark qsengine's GPU backend is about 5 times faster than Qiskit Aer.
 - **Any GPU, nothing to install.** The GPU backend uses [wgpu](https://wgpu.rs), so it runs on NVIDIA, AMD, Intel and Apple GPUs through Vulkan, DirectX 12 or Metal. No CUDA, no vendor toolkit.
 - **Works everywhere.** Without a usable GPU the same code runs on the CPU, in full 64-bit precision.
-- **Small, plain API.** One class, nineteen gates plus any 2x2 unitary, mid-circuit measurement with classically controlled gates, and four ways to get a result: counts, probabilities, amplitudes and Pauli expectation values. Mistakes raise a normal Python `ValueError` on the line that made them.
+- **Small, plain API.** One class, thirty gates plus any 2x2 unitary, mid-circuit measurement with classically controlled gates, and four ways to get a result: counts, probabilities, amplitudes and Pauli expectation values. Mistakes raise a normal Python `ValueError` on the line that made them.
 - **Built to learn with.** The website walks from bra-ket notation to a complete Deutsch-Jozsa run, and every example on it is real qsengine output.
 
 ## Install
@@ -79,12 +79,12 @@ print(qc.run(shots=1000, seed=1))   # bit 2 (leftmost) is 1 in every shot
 
 | Gates | Methods |
 | --- | --- |
-| Single qubit | `x`, `y`, `z`, `h`, `s`, `sdg`, `t`, `tdg` |
+| Single qubit | `x`, `y`, `z`, `h`, `s`, `sdg`, `t`, `tdg`, `sx`, `sxdg` |
 | Angles (radians) | `rx(q, theta)`, `ry(q, theta)`, `rz(q, theta)`, `p(q, lam)`, `u(q, theta, phi, lam)` |
-| Two qubit | `cx(control, target)`, `cz(control, target)`, `cp(control, target, lam)`, `crz(control, target, theta)`, `swap(q1, q2)` |
-| Three qubit | `ccx(control1, control2, target)` |
+| Two qubit | `cx`, `cy`, `cz`, `ch` `(control, target)`; `cp`, `crx`, `cry`, `crz` `(control, target, angle)`; `swap(q1, q2)`; `rxx`, `ryy`, `rzz` `(q1, q2, theta)` |
+| Three or more | `ccx(control1, control2, target)`, `cswap(control, q1, q2)`, `mcx(controls, target)` |
 | Any 2x2 unitary | `unitary(matrix, target, controls=[])` |
-| Measurement | `measure(qubit, clbit)`, `reset(qubit)`, `with if_test(clbits, value):` |
+| Measurement | `measure(qubit, clbit)`, `measure_all()`, `reset(qubit)`, `with if_test(clbits, value):` |
 
 Bitstrings put **qubit 0 on the right**, the same convention as Qiskit. Pass `seed` to `run()` for repeatable counts.
 
